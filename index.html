@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Portafolio Digital — Antonia Caroca</title>
+
+  <style>
+
+    :root{
+      --bg:#fbfaf8;
+      --text:#111111;
+      --muted:#77716f;
+      --pink:#e682a8;
+      --pink2:#f3aac4;
+      --pink3:#f8cfdd;
+      --line:#ded8d3;
+      --white:#ffffff;
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:Arial, Helvetica, sans-serif;
+      overflow-x:hidden;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    img{
+      display:block;
+      width:100%;
+    }
+
+    .page{
+      width:min(1280px, calc(100% - 50px));
+      margin:auto;
+    }
+
+
+    /* ========================
+       NAV
+    ========================= */
+
+    nav{
+      height:82px;
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      font-size:11px;
+      text-transform:uppercase;
+      border-bottom:1px solid var(--line);
+    }
+
+    .nav-name{
+      font-weight:700;
+    }
+
+    .nav-center{
+      display:flex;
+      gap:36px;
+    }
+
+    .nav-center a{
+      color:#777;
+      transition:.25s ease;
+    }
+
+    .nav-center a:hover{
+      color:#111;
+    }
+
+    .nav-center a:first-child{
+      color:#111;
+      font-weight:700;
+    }
+
+    .nav-right{
+      justify-self:end;
+      color:#666;
+      display:flex;
+      align-items:center;
+      gap:18px;
+    }
+
+    .nav-dot{
+      width:15px;
+      height:15px;
+      border-radius:50%;
+      background:var(--pink);
+    }
+
+
+    /* ========================
+       HERO
+    ========================= */
+
+    .hero{
+      min-height:620px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      align-items:center;
+      gap:35px;
+      padding:60px 0 75px;
+    }
+
+    .hero-left{
+      position:relative;
+      z-index:3;
+    }
+
+    .hero-small{
+      margin-bottom:24px;
+      color:#706d6b;
+      font-size:11px;
+      line-height:1.6;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+
+    h1{
+      font-size:clamp(75px,8.5vw,135px);
+      font-weight:900;
+      line-height:.82;
+      letter-spacing:-.075em;
+      text-transform:uppercase;
+    }
+
+    .pink-title{
+      color:var(--pink);
+    }
+
+    .hero-copy{
+      max-width:410px;
+      margin-top:32px;
+      font-size:16px;
+      line-height:1.45;
+    }
+
+
+    /* ========================
+       HERO BUTTON
+    ========================= */
+
+    .hero-button{
+      margin-top:30px;
+      display:inline-flex;
+      align-items:center;
+      gap:20px;
+      padding:7px 8px 7px 24px;
+      border:1px solid var(--pink);
+      border-radius:40px;
+      color:var(--pink);
+      font-size:12px;
+      transition:.3s ease;
+    }
+
+    .hero-button-circle{
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:var(--pink);
+      color:white;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:23px;
+      transition:.3s ease;
+    }
+
+    .hero-button:hover{
+      background:var(--pink);
+      color:#fff;
+    }
+
+    .hero-button:hover .hero-button-circle{
+      background:#fff;
+      color:var(--pink);
+      transform:translateX(3px);
+    }
+
+
+    /* ========================
+       HERO VISUAL
+    ========================= */
+
+    .hero-visual{
+      height:520px;
+      position:relative;
+    }
+
+    .pink-square{
+      position:absolute;
+      width:330px;
+      height:260px;
+      border-radius:55px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #f4a3c0,
+          #dc759c
+        );
+
+      right:65px;
+      top:10px;
+    }
+
+    .pink-square-small{
+      position:absolute;
+      width:205px;
+      height:180px;
+      border-radius:45px;
+      background:#f1a1bf;
+      right:10px;
+      bottom:30px;
+    }
+
+    .bubble{
+      position:absolute;
+      width:285px;
+      height:285px;
+      left:20px;
+      top:65px;
+
+      border-radius:
+        55% 45% 65% 35% /
+        50% 55% 45% 50%;
+
+      background:
+        radial-gradient(
+          circle at 30% 22%,
+          rgba(255,255,255,.9),
+          transparent 12%
+        ),
+        linear-gradient(
+          145deg,
+          #ffd5e4,
+          #f38eb5 45%,
+          #fff0f6
+        );
+
+      box-shadow:
+        inset -30px -30px 60px rgba(255,255,255,.4),
+        0 18px 50px rgba(230,130,168,.18);
+
+      transform:rotate(-18deg);
+      z-index:1;
+    }
+
+    .bubble::after{
+      content:"";
+      position:absolute;
+      width:145px;
+      height:120px;
+      border-radius:60%;
+      background:rgba(255,255,255,.25);
+      right:20px;
+      top:40px;
+      filter:blur(8px);
+    }
+
+
+    /* ========================
+       COMPUTADOR
+    ========================= */
+
+    .computer-image{
+      position:absolute;
+      width:450px;
+      height:auto;
+      right:-15px;
+      bottom:25px;
+      z-index:4;
+
+      filter:
+        drop-shadow(
+          0 24px 22px
+          rgba(0,0,0,.14)
+        );
+
+      transition:transform .5s ease;
+    }
+
+    .computer-image:hover{
+      transform:
+        translateY(-8px)
+        rotate(1deg);
+    }
+
+    .hero-side-text{
+      position:absolute;
+      right:0;
+      bottom:-5px;
+      font-size:11px;
+      line-height:1.55;
+      text-align:right;
+      color:#676260;
+      text-transform:uppercase;
+      letter-spacing:.15em;
+      z-index:5;
+    }
+
+
+    /* ========================
+       PROJECTS
+    ========================= */
+
+    .projects-section{
+      background:
+        linear-gradient(
+          135deg,
+          #f1a1bf,
+          #efbdd0
+        );
+
+      border-radius:25px;
+      padding:28px 22px 35px;
+      margin-bottom:85px;
+    }
+
+    .projects-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:25px;
+    }
+
+    .projects-count{
+      font-size:20px;
+      color:rgba(255,255,255,.65);
+      font-weight:700;
+    }
+
+    .projects-heading{
+      font-size:42px;
+      color:white;
+      font-weight:900;
+      letter-spacing:-.04em;
+      text-transform:uppercase;
+    }
+
+    .view-all{
+      padding:10px 17px;
+      border:1px solid rgba(255,255,255,.7);
+      border-radius:40px;
+      color:white;
+      font-size:11px;
+    }
+
+
+    /* ========================
+       PROJECT CARDS
+    ========================= */
+
+    .project-grid{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:12px;
+    }
+
+    .project-card{
+      min-height:330px;
+      padding:14px;
+      background:rgba(255,255,255,.72);
+      border-radius:15px;
+      display:flex;
+      flex-direction:column;
+
+      transition:
+        transform .3s ease,
+        background .3s ease,
+        box-shadow .3s ease;
+    }
+
+    .project-card:hover{
+      transform:translateY(-6px);
+      background:rgba(255,255,255,.50);
+      box-shadow:0 15px 30px rgba(150,70,100,.10);
+    }
+
+    .project-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:12px;
+    }
+
+    .project-number{
+      font-size:20px;
+      font-weight:700;
+      letter-spacing:-.06em;
+    }
+
+    .project-arrow{
+      font-size:20px;
+      transition:.3s ease;
+    }
+
+    .project-card:hover .project-arrow{
+      transform:translate(3px,-3px);
+    }
+
+    .project-image{
+      width:100%;
+      aspect-ratio:1.25 / 1;
+      overflow:hidden;
+      margin-bottom:14px;
+      background:#eee;
+    }
+
+    .project-image img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transition:.4s ease;
+    }
+
+    .project-card:hover img{
+      transform:scale(1.04);
+    }
+
+    .project-title{
+      font-size:14px;
+      line-height:1.1;
+      font-weight:800;
+      text-transform:uppercase;
+      margin-bottom:7px;
+    }
+
+    .project-extra{
+      font-size:8px;
+      color:#746f6d;
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+
+    .tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:5px;
+      margin-top:auto;
+    }
+
+    .tag{
+      background:rgba(255,255,255,.65);
+      border-radius:20px;
+      padding:5px 8px;
+      font-size:7px;
+      text-transform:uppercase;
+    }
+
+
+    /* ========================
+       SOBRE MI
+    ========================= */
+
+    .about{
+      min-height:560px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      align-items:center;
+      gap:60px;
+      padding-bottom:90px;
+    }
+
+    .about-label{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      margin-bottom:18px;
+      color:var(--pink);
+    }
+
+    .about h2{
+      font-size:58px;
+      line-height:.9;
+      font-weight:900;
+      letter-spacing:-.05em;
+      text-transform:uppercase;
+      margin-bottom:27px;
+    }
+
+    .about-copy{
+      max-width:500px;
+      font-size:15px;
+      line-height:1.6;
+      color:#47413f;
+    }
+
+    .about-copy p + p{
+      margin-top:16px;
+    }
+
+
+    /* ========================
+       ABOUT ART
+    ========================= */
+
+    .about-art{
+      position:relative;
+      height:430px;
+    }
+
+
+    /* MINI YO */
+
+    .mini-yo{
+      position:absolute;
+      width:550px;
+      height:auto;
+
+      left: 10px;px;
+      bottom:15px;
+
+      z-index:4;
+
+      filter:
+        drop-shadow(
+          0 20px 18px
+          rgba(0,0,0,.13)
+        );
+
+      transition:transform .5s ease;
+    }
+
+    .mini-yo:hover{
+      transform:
+        translateY(-7px)
+        rotate(-1deg);
+    }
+
+
+    /* CÍRCULO ROSADO */
+
+    .about-bubble{
+      position:absolute;
+      width: 250px;
+      height:250px;
+
+      left:70px;
+      bottom:45px;
+
+      border-radius:50%;
+
+      background:
+        radial-gradient(
+          circle at 30% 30%,
+          #ffeaf2,
+          #efa2bf
+        );
+
+      opacity:.75;
+      z-index:1;
+    }
+
+
+    /* RECTÁNGULO ROSADO */
+
+    .about-photo{
+      position:absolute;
+
+      width:200px;
+      height:290px;
+
+      left:210px;
+      top:30px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #f7c2d5,
+          #e682a8
+        );
+
+      z-index:2;
+    }
+
+
+    /* CUADRADO ROSADO */
+
+    .about-small{
+      position:absolute;
+
+      width:120px;
+      height:105px;
+
+      right:150px;
+      top:120px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #f4a8c3,
+          #db7199
+        );
+
+      z-index:3;
+    }
+
+
+    /* PALABRAS */
+
+    .about-side{
+      position:absolute;
+
+      right:0;
+      bottom:40px;
+
+      font-size:10px;
+      text-transform:uppercase;
+      color:#777;
+      line-height:1.6;
+      letter-spacing:.08em;
+
+      z-index:5;
+    }
+
+
+    /* ========================
+       FOOTER
+    ========================= */
+
+    footer{
+      height:90px;
+      border-top:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      font-size:10px;
+      text-transform:uppercase;
+    }
+
+    .footer-center{
+      color:var(--pink);
+      letter-spacing:.12em;
+    }
+
+
+    /* ========================
+       RESPONSIVE
+    ========================= */
+
+    @media(max-width:1000px){
+
+      .hero{
+        grid-template-columns:1fr;
+      }
+
+      .hero-visual{
+        min-height:500px;
+      }
+
+      .project-grid{
+        grid-template-columns:repeat(2,1fr);
+      }
+
+      .about{
+        grid-template-columns:1fr;
+      }
+
+    }
+
+
+    @media(max-width:650px){
+
+      .page{
+        width:calc(100% - 28px);
+      }
+
+      nav{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .nav-center{
+        display:none;
+      }
+
+      .nav-right span{
+        display:none;
+      }
+
+      h1{
+        font-size:58px;
+      }
+
+      .hero{
+        padding-top:45px;
+      }
+
+      .hero-visual{
+        height:420px;
+        transform:scale(.88);
+        transform-origin:center top;
+        margin-bottom:-50px;
+      }
+
+      .computer-image{
+        width:390px;
+        right:-20px;
+      }
+
+      .projects-heading{
+        font-size:31px;
+      }
+
+      .project-grid{
+        grid-template-columns:1fr;
+      }
+
+      .projects-head{
+        align-items:flex-start;
+        gap:15px;
+      }
+
+      .about h2{
+        font-size:44px;
+      }
+
+      .about-art{
+        height:400px;
+        transform:scale(.88);
+        transform-origin:left top;
+      }
+
+      .mini-yo{
+        width:280px;
+      }
+
+      footer{
+        flex-direction:column;
+        justify-content:center;
+        gap:8px;
+        align-items:flex-start;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+<div class="page">
+
+
+  <!-- NAV -->
+
+  <nav>
+
+    <div class="nav-name">
+      Antonia Caroca
+    </div>
+
+    <div class="nav-center">
+
+      <a href="#proyectos">
+        Proyectos
+      </a>
+
+      <a href="#sobre-mi">
+        Sobre mí
+      </a>
+
+    </div>
+
+    <div class="nav-right">
+
+      <span>
+        Taller de Interfaces
+      </span>
+
+      <div class="nav-dot"></div>
+
+    </div>
+
+  </nav>
+
+
+
+  <!-- HERO -->
+
+  <section class="hero">
+
+    <div class="hero-left">
+
+    
+
+      <h1>
+
+        Portafolio<br>
+
+        <span class="pink-title">
+          Digital
+        </span>
+
+      </h1>
+
+
+      <p class="hero-copy">
+
+        Exploración de interfaces y experiencias
+        interactivas a través de sonido, imagen
+        y programación.
+
+      </p>
+
+
+      <a
+        href="#proyectos"
+        class="hero-button"
+      >
+
+        Ver proyectos
+
+        <span class="hero-button-circle">
+          →
+        </span>
+
+      </a>
+
+    </div>
+
+
+    <div class="hero-visual">
+
+      <div class="pink-square"></div>
+
+      <div class="pink-square-small"></div>
+
+      <div class="bubble"></div>
+
+
+      <img
+        class="computer-image"
+        src="imagenes/Computador-retro.png"
+        alt="Computador retro rosado"
+      >
+
+
+    </div>
+
+  </section>
+
+
+
+  <!-- PROYECTOS -->
+
+  <section
+    class="projects-section"
+    id="proyectos"
+  >
+
+    <div class="projects-head">
+
+      <div class="projects-count">
+        (05)
+      </div>
+
+      <div class="projects-heading">
+        Proyectos
+      </div>
+
+
+    </div>
+
+
+    <div class="project-grid">
+
+
+      <!-- 01 -->
+
+      <a
+        class="project-card"
+        href="https://2605-ac.github.io/Lamina-Interfaz/"
+        target="_blank"
+      >
+
+        <div class="project-top">
+
+          <span class="project-number">
+            01
+          </span>
+
+          <span class="project-arrow">
+            ↗
+          </span>
+
+        </div>
+
+
+        <div class="project-image">
+
+          <img
+            src="imagenes/lamina-microondas.jpeg"
+            alt="Lámina de Interfaz"
+          >
+
+        </div>
+
+
+        <h3 class="project-title">
+          Lámina de Interfaz
+        </h3>
+
+
+        <div class="tags">
+
+          <span class="tag">Interfaz</span>
+          <span class="tag">Análisis</span>
+
+        </div>
+
+      </a>
+
+
+
+      <!-- 02 -->
+
+      <a
+        class="project-card"
+        href="https://2605-ac.github.io/Instrumentos-juego/"
+        target="_blank"
+      >
+
+        <div class="project-top">
+
+          <span class="project-number">
+            02
+          </span>
+
+          <span class="project-arrow">
+            ↗
+          </span>
+
+        </div>
+
+
+        <div class="project-image">
+
+          <img
+            src="imagenes/instrumentos-juego.jpeg"
+            alt="Instrumentos de Juego"
+          >
+
+        </div>
+
+
+        <h3 class="project-title">
+          Instrumentos de Juego
+        </h3>
+
+
+        <div class="tags">
+
+          <span class="tag">Web</span>
+          <span class="tag">Audio</span>
+
+        </div>
+
+      </a>
+
+
+
+      <!-- 03 -->
+
+      <a
+        class="project-card"
+        href="https://youtu.be/XZEevSec6Kc?si=FowhsuzKWdmnfRDr"
+        target="_blank"
+      >
+
+        <div class="project-top">
+
+          <span class="project-number">
+            03
+          </span>
+
+          <span class="project-arrow">
+            ↗
+          </span>
+
+        </div>
+
+
+        <div class="project-image">
+
+          <img
+            src="imagenes/monitor-audio.jpeg"
+            alt="Monitor de Audio"
+          >
+
+        </div>
+
+
+        <h3 class="project-title">
+          Monitor de Audio
+        </h3>
+
+
+        <div class="tags">
+
+          <span class="tag">Max/MSP</span>
+          <span class="tag">Audio</span>
+        </div>
+
+      </a>
+
+
+
+      <!-- 04 -->
+
+      <a
+        class="project-card"
+        href="https://2605-ac.github.io/sonificaci-n-de-imagen/"
+        target="_blank"
+      >
+
+        <div class="project-top">
+
+          <span class="project-number">
+            04
+          </span>
+
+          <span class="project-arrow">
+            ↗
+          </span>
+
+        </div>
+
+
+        <div class="project-image">
+
+          <img
+            src="imagenes/sonificacion.jpeg"
+            alt="Sonificación de Datos e Imagen"
+          >
+
+        </div>
+
+
+        <h3 class="project-title">
+          Sonificación de imagen
+        </h3>
+
+
+        <div class="tags">
+
+          <span class="tag">Web</span>
+          <span class="tag">Sonido</span>
+
+        </div>
+
+      </a>
+
+
+
+      <!-- 05 -->
+
+      <a
+        class="project-card"
+        href="https://2605-ac.github.io/Voice-Lab/"
+        target="_blank"
+      >
+
+        <div class="project-top">
+
+          <span class="project-number">
+            05
+          </span>
+
+          <span class="project-arrow">
+            ↗
+          </span>
+
+        </div>
+
+
+        <div class="project-image">
+
+          <img
+            src="imagenes/audio-visual.jpeg"
+            alt="Audio Visual"
+          >
+
+        </div>
+
+
+        <h3 class="project-title">
+          Audio Visual
+        </h3>
+
+
+
+        <div class="tags">
+
+          <span class="tag">Audio</span>
+          <span class="tag">Visual</span>
+
+        </div>
+
+      </a>
+
+
+    </div>
+
+  </section>
+
+
+
+  <!-- SOBRE MI -->
+
+  <section
+    class="about"
+    id="sobre-mi"
+  >
+
+    <div>
+
+      <div class="about-label">
+        Sobre mí
+      </div>
+
+
+      <h2>
+
+        
+        ¡HOLA!
+
+      </h2>
+
+
+      <div class="about-copy">
+
+        <p>
+          Soy Antonia Caroca, estudiante de tercer año de la doble titulación en
+          Ingeniería Comercial e Ingeniería en Diseño.
+          Me interesa el diseño como una forma de transformar
+          ideas en experiencias visuales e interactivas.
+        </p>
+
+        <p>
+          En Taller de Interfaces he explorado distintas formas de 
+          relacionar diseño y tecnología, trabajando con interacción, 
+          sonido, imagen y programación. A través de estos proyectos 
+          he podido experimentar con nuevas herramientas y desarrollar 
+          mi creatividad, descubriendo nuevas formas de llevar 
+          una idea a una experiencia.
+        </p>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ARTE + MINI YO -->
+
+    <div class="about-art">
+
+      <div class="about-bubble"></div>
+
+      <div class="about-photo"></div>
+
+      <div class="about-small"></div>
+
+
+      <img
+        class="mini-yo"
+        src="imagenes/mini-yo.png"
+        alt="Foto de infancia de Antonia"
+      >
+
+
+    </div>
+
+  </section>
+
+
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <span>
+      © 2026 Antonia Caroca
+    </span>
+
+    <span class="footer-center">
+      Taller de Interfaces
+    </span>
+
+    <span>
+      UAI
+    </span>
+
+  </footer>
+
+
+</div>
+
+</body>
+
+</html>
