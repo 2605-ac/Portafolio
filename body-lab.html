@@ -1,0 +1,494 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BODY LAB — Virus Attack</title>
+<style>
+:root{--bg:#09091d;--panel:#191633;--pink:#ff5db8;--cyan:#67eaf3;--muted:#c1bbd9}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:white;font-family:Arial,sans-serif}
+button{cursor:pointer;font:inherit}
+.screen{display:none;min-height:100vh;padding:25px;align-items:center;justify-content:center}
+.screen.active{display:flex}
+.container{width:min(100%,950px);margin:auto}
+.card{background:var(--panel);border:1px solid #ffffff25;border-radius:24px;padding:28px}
+.hero{text-align:center;padding:45px 25px;background:radial-gradient(circle at top,#66319b66,transparent 65%),var(--panel)}
+h1{font-size:clamp(44px,8vw,82px);color:var(--pink);margin:12px 0;text-shadow:0 0 30px #ff5db855}
+h2{font-size:clamp(25px,4vw,36px);margin:10px 0 20px}
+h3{color:var(--cyan);margin:12px 0}
+p{color:var(--muted);line-height:1.6}
+.tag{color:var(--cyan);font-size:12px;letter-spacing:2px;font-weight:bold}
+.buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:25px}
+.btn{padding:14px 20px;border-radius:13px;background:#302650;border:1px solid #ffffff30;color:white;font-weight:bold}
+.btn.primary{background:var(--pink);color:#1b0b29;border:0}
+.btn:hover{filter:brightness(1.15)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.info{background:#211c40;border-radius:18px;padding:23px;border:1px solid #ffffff15}
+.info .emoji{font-size:34px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px}
+.levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin:25px 0}
+.level{background:#211b40;padding:22px;border:1px solid #ffffff25;border-radius:20px;text-align:center}
+.level .emoji{font-size:42px}
+.level .status{font-size:12px;color:var(--cyan);font-weight:bold}
+.level.locked{opacity:.5}
+#gameScreen{padding:0;position:relative;overflow:hidden}
+#gameScreen.active{display:block}
+canvas{display:block;width:100vw;height:100vh;touch-action:none}
+#hud{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;gap:7px;pointer-events:none}
+.hud{background:#100c2de8;border:1px solid #ffffff30;padding:11px;border-radius:12px;font-size:13px;font-weight:bold}
+#objective{position:absolute;top:77px;left:50%;transform:translateX(-50%);background:#100c2de8;padding:13px 20px;border-radius:15px;text-align:center;font-size:13px;min-width:220px;pointer-events:none}
+#shieldInfo{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:#100c2de8;border-radius:20px;padding:12px 20px;font-size:13px;white-space:nowrap;pointer-events:none}
+.progress{height:9px;background:#ffffff30;border-radius:10px;overflow:hidden;margin-top:8px}
+#fill{height:100%;width:0;background:var(--cyan)}
+@media(max-width:650px){
+.grid,.levels{grid-template-columns:1fr}
+.card{padding:20px}
+.hud{font-size:11px;padding:8px}
+#objective{top:65px}
+}
+</style>
+</head>
+<body>
+
+<section class="screen active" id="home">
+ <div class="container">
+  <div class="card hero">
+   <div class="tag">CONGRESO FUTURO · CIENCIA CHILENA</div>
+   <div style="font-size:65px;margin-top:20px">🧬🦠</div>
+   <h1>BODY LAB</h1>
+   <h2>VIRUS ATTACK</h2>
+   <p>Una aventura científica dentro del cuerpo humano.</p>
+   <p>Supera 3 niveles y descubre cómo la ciencia chilena contribuyó al desarrollo de la vacuna contra la hepatitis B.</p>
+   <div class="buttons">
+    <button class="btn primary" onclick="openLevels()">▶ JUGAR</button>
+    <button class="btn" onclick="show('science')">🔬 DESCUBRE LA CIENCIA</button>
+    <button class="btn" onclick="show('instructions')">🎮 INSTRUCCIONES</button>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="screen" id="levels">
+ <div class="container">
+  <div class="top">
+   <div><div class="tag">SELECCIÓN DE MISIÓN</div><h2>ELIGE TU NIVEL</h2></div>
+   <button class="btn" onclick="show('home')">← VOLVER</button>
+  </div>
+  <div class="levels" id="levelCards"></div>
+  <p style="text-align:center">Completa cada misión para desbloquear la siguiente.</p>
+ </div>
+</section>
+
+<section class="screen" id="science">
+ <div class="container">
+  <div class="top">
+   <div><div class="tag">ARCHIVO CIENTÍFICO</div><h2>DESCUBRE LA CIENCIA</h2></div>
+   <button class="btn" onclick="show('home')">← VOLVER</button>
+  </div>
+  <div class="grid">
+   <div class="info"><div class="emoji">🦠</div><h3>01 · Hepatitis B</h3>
+    <p>La hepatitis B es una infección viral que afecta principalmente al hígado. Puede ser aguda o crónica y, en algunos casos, provocar cirrosis o cáncer hepático.</p>
+   </div>
+   <div class="info"><div class="emoji">💉</div><h3>02 · La vacuna</h3>
+    <p>La vacuna contiene un antígeno que estimula al sistema inmunológico para generar una respuesta protectora contra el virus de la hepatitis B.</p>
+   </div>
+   <div class="info"><div class="emoji">🧬</div><h3>03 · Ingeniería genética</h3>
+    <p>La tecnología recombinante permite producir una proteína del virus mediante células como levaduras. La proteína se purifica para elaborar la vacuna.</p>
+   </div>
+   <div class="info"><div class="emoji">🇨🇱</div><h3>04 · Pablo Valenzuela</h3>
+    <p>El científico chileno Pablo Valenzuela tuvo un papel fundamental en el desarrollo de una vacuna recombinante contra la hepatitis B, aprobada en 1986.</p>
+   </div>
+  </div>
+  <div class="card" style="margin-top:18px">
+   <h3>🌎 ¿Por qué importa este descubrimiento?</h3>
+   <p>El desarrollo de esta vacuna fue un avance importante en biotecnología, al permitir producir el antígeno mediante ingeniería genética en lugar de obtenerlo de plasma humano.</p>
+   <p>La vacuna es preventiva: no elimina una infección ya establecida. Los escudos y objetos del videojuego son representaciones simbólicas.</p>
+  </div>
+ </div>
+</section>
+
+<section class="screen" id="instructions">
+ <div class="container" style="max-width:720px">
+  <div class="card">
+   <h2>🎮 CÓMO JUGAR</h2>
+   <p><b>Movimiento:</b> WASD, flechas del teclado, mouse o dedo.</p>
+   <p><b>Virus rosados:</b> evítalos para conservar tus vidas.</p>
+   <p><b>Objetos turquesa (+):</b> recógelos para completar el objetivo de cada nivel.</p>
+   <p><b>Escudo:</b> recoge suficientes objetos para activar protección temporal.</p>
+   <p><b>Victoria:</b> cumple el objetivo y sobrevive hasta terminar los 20 segundos.</p>
+   <p>En cada nivel aprenderás una parte diferente de la historia científica.</p>
+   <div class="buttons">
+    <button class="btn" onclick="show('home')">← VOLVER</button>
+    <button class="btn primary" onclick="openLevels()">▶ ELEGIR NIVEL</button>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="screen" id="briefing">
+ <div class="container" style="max-width:660px">
+  <div class="card hero">
+   <div class="tag" id="briefTag"></div>
+   <div style="font-size:65px" id="briefEmoji"></div>
+   <h2 id="briefTitle"></h2>
+   <p id="briefStory"></p>
+   <div class="info" style="text-align:left">
+    <h3>🎯 TU OBJETIVO</h3>
+    <p id="briefGoal"></p>
+   </div>
+   <div class="buttons">
+    <button class="btn" onclick="openLevels()">← NIVELES</button>
+    <button class="btn primary" onclick="beginLevel()">COMENZAR ▶</button>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="screen" id="gameScreen">
+ <canvas id="game"></canvas>
+ <div id="hud">
+  <div class="hud">🧬 NIVEL <span id="hudLevel">1</span></div>
+  <div class="hud">⭐ <span id="score">0</span></div>
+  <div class="hud">❤️ <span id="lives">3</span></div>
+  <div class="hud">⏱ <span id="timer">20</span>s</div>
+ </div>
+ <div id="objective">
+  <b id="goalLabel">MUESTRAS</b>
+  <div><span id="collected">0</span> / <span id="needed">3</span></div>
+ </div>
+ <div id="shieldInfo">
+  🛡️ ESCUDO <span id="shieldText">0%</span>
+  <div class="progress"><div id="fill"></div></div>
+ </div>
+</section>
+
+<section class="screen" id="levelResult">
+ <div class="container" style="max-width:650px">
+  <div class="card hero">
+   <div style="font-size:60px" id="resultEmoji"></div>
+   <div class="tag" id="resultTag"></div>
+   <h2 id="resultTitle"></h2>
+   <p>PUNTAJE ACUMULADO</p>
+   <div style="font-size:55px;color:var(--cyan);font-weight:bold" id="resultScore"></div>
+   <div class="info" style="text-align:left;margin-top:20px">
+    <h3>🔬 LO QUE DESCUBRISTE</h3>
+    <p id="resultFact"></p>
+   </div>
+   <div class="buttons" id="resultButtons"></div>
+  </div>
+ </div>
+</section>
+
+<script>
+const missions=[
+ {
+  name:"INVASIÓN VIRAL",emoji:"🦠",goal:3,
+  label:"MUESTRAS CIENTÍFICAS",
+  story:"El virus de la hepatitis B amenaza al hígado. Tu primera misión es conocer al enemigo y sobrevivir.",
+  task:"Recoge 3 muestras turquesa y sobrevive 20 segundos.",
+  fact:"La hepatitis B es una infección viral que afecta al hígado. Puede producir infecciones crónicas y complicaciones graves. La vacunación es una medida importante de prevención.",
+  speed:65,spawn:1.6
+ },
+ {
+  name:"ACTIVA LAS DEFENSAS",emoji:"💉",goal:5,
+  label:"ANTÍGENOS SIMBÓLICOS",
+  story:"Ahora debes comprender cómo una vacuna ayuda al sistema inmunológico a reconocer una amenaza.",
+  task:"Recoge 5 objetos turquesa y sobrevive 20 segundos. Los virus serán más rápidos.",
+  fact:"La vacuna recombinante contra la hepatitis B contiene el antígeno de superficie del virus. Este estimula una respuesta inmunológica protectora. En el juego, el escudo representa simbólicamente esa protección.",
+  speed:95,spawn:1.15
+ },
+ {
+  name:"LABORATORIO CHILENO",emoji:"🇨🇱",goal:5,
+  label:"COMPONENTES CIENTÍFICOS",
+  story:"Llegaste al laboratorio de biotecnología. Descubre el aporte chileno a una innovación que transformó la prevención.",
+  task:"Recoge 5 componentes simbólicos y sobrevive 20 segundos ante los virus más veloces.",
+  fact:"Pablo Valenzuela, científico chileno, fue una figura clave en el desarrollo de la vacuna recombinante contra la hepatitis B, aprobada en 1986. La ingeniería genética permitió producir el antígeno en células como levaduras.",
+  speed:125,spawn:.85
+ }
+];
+
+let unlocked=1,current=0,totalScore=0;
+let playing=false,frame=null,last=0;
+let time=0,lives=3,collected=0,shield=0,charge=0,invincible=0;
+let enemies=[],items=[],particles=[];
+let player=null,keys={},pointer={x:0,y:0},pointerActive=false;
+let spawnClock=0,itemClock=0;
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+let W=0,H=0;
+
+function show(id){
+ playing=false;
+ if(frame!==null){cancelAnimationFrame(frame);frame=null}
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ window.scrollTo(0,0);
+}
+function openLevels(){
+ show("levels");
+ const root=document.getElementById("levelCards");
+ root.innerHTML="";
+ missions.forEach((m,i)=>{
+  const locked=i+1>unlocked;
+  const card=document.createElement("div");
+  card.className="level"+(locked?" locked":"");
+  card.innerHTML=`
+   <div class="emoji">${m.emoji}</div>
+   <div class="tag">NIVEL ${i+1}</div>
+   <h3>${m.name}</h3>
+   <p>${m.task}</p>
+   <div class="status">${locked?"🔒 BLOQUEADO":"✓ DISPONIBLE"}</div>
+  `;
+  if(!locked){
+   const b=document.createElement("button");
+   b.className="btn primary";
+   b.textContent="JUGAR";
+   b.onclick=()=>selectLevel(i);
+   card.appendChild(b);
+  }
+  root.appendChild(card);
+ });
+}
+function selectLevel(i){
+ if(i+1>unlocked)return;
+ current=i;
+ const m=missions[i];
+ document.getElementById("briefTag").textContent="NIVEL "+(i+1)+" / 3";
+ document.getElementById("briefEmoji").textContent=m.emoji;
+ document.getElementById("briefTitle").textContent=m.name;
+ document.getElementById("briefStory").textContent=m.story;
+ document.getElementById("briefGoal").textContent=m.task;
+ show("briefing");
+}
+function resize(){
+ W=canvas.width=innerWidth;
+ H=canvas.height=innerHeight;
+ if(player){
+  player.x=Math.max(25,Math.min(W-25,player.x));
+  player.y=Math.max(110,Math.min(H-45,player.y));
+ }
+}
+addEventListener("resize",resize);
+resize();
+function rand(a,b){return a+Math.random()*(b-a)}
+function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function circle(x,y,r,color){
+ ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+}
+function beginLevel(){
+ show("gameScreen");
+ resize();
+ player={x:W/2,y:H*.6,r:23,speed:340};
+ pointer={x:player.x,y:player.y};pointerActive=false;
+ enemies=[];items=[];particles=[];
+ time=0;lives=3;collected=0;shield=0;charge=0;invincible=0;
+ spawnClock=0;itemClock=0;
+ document.getElementById("hudLevel").textContent=current+1;
+ document.getElementById("goalLabel").textContent=missions[current].label;
+ document.getElementById("needed").textContent=missions[current].goal;
+ playing=true;updateHUD();
+ last=performance.now();
+ frame=requestAnimationFrame(loop);
+}
+document.addEventListener("keydown",e=>{
+ keys[e.key.toLowerCase()]=true;
+ if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase()))e.preventDefault();
+});
+document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+canvas.addEventListener("pointermove",e=>{
+ if(!playing)return;
+ pointer={x:e.clientX,y:e.clientY};pointerActive=true;
+});
+canvas.addEventListener("pointerdown",e=>{
+ if(!playing)return;
+ pointer={x:e.clientX,y:e.clientY};pointerActive=true;
+});
+function spawnEnemy(){
+ const side=Math.floor(rand(0,4));
+ let x,y;
+ if(side===0){x=rand(0,W);y=-40}
+ if(side===1){x=W+40;y=rand(0,H)}
+ if(side===2){x=rand(0,W);y=H+40}
+ if(side===3){x=-40;y=rand(0,H)}
+ enemies.push({x,y,r:rand(16,25),speed:missions[current].speed+rand(0,30),angle:0});
+}
+function spawnItem(){
+ items.push({x:rand(35,Math.max(36,W-35)),y:rand(120,Math.max(121,H-80)),r:16,angle:0});
+}
+function burst(x,y,color){
+ for(let i=0;i<12;i++){
+  const a=rand(0,Math.PI*2),s=rand(30,150);
+  particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rand(.3,.7),color});
+ }
+}
+function updateHUD(){
+ document.getElementById("score").textContent=totalScore;
+ document.getElementById("lives").textContent=lives;
+ document.getElementById("timer").textContent=Math.max(0,Math.ceil(20-time));
+ document.getElementById("collected").textContent=collected;
+ document.getElementById("shieldText").textContent=shield>0?"ACTIVO":charge+"%";
+ document.getElementById("fill").style.width=(shield>0?100:charge)+"%";
+}
+function update(dt){
+ time+=dt;
+ let dx=0,dy=0;
+ if(keys["a"]||keys["arrowleft"])dx--;
+ if(keys["d"]||keys["arrowright"])dx++;
+ if(keys["w"]||keys["arrowup"])dy--;
+ if(keys["s"]||keys["arrowdown"])dy++;
+ if(dx||dy){
+  const len=Math.hypot(dx,dy);
+  player.x+=dx/len*player.speed*dt;
+  player.y+=dy/len*player.speed*dt;
+  pointerActive=false;
+ }else if(pointerActive){
+  const d=distance(player,pointer);
+  if(d>3){
+   const step=Math.min(d,player.speed*dt);
+   player.x+=(pointer.x-player.x)/d*step;
+   player.y+=(pointer.y-player.y)/d*step;
+  }
+ }
+ player.x=Math.max(25,Math.min(W-25,player.x));
+ player.y=Math.max(110,Math.min(H-45,player.y));
+ shield=Math.max(0,shield-dt);
+ invincible=Math.max(0,invincible-dt);
+ spawnClock+=dt;itemClock+=dt;
+ if(spawnClock>=missions[current].spawn){
+  spawnEnemy();spawnClock=0;
+ }
+ if(itemClock>=2){
+  spawnItem();itemClock=0;
+ }
+ for(let i=enemies.length-1;i>=0;i--){
+  const e=enemies[i],d=distance(e,player)||1;
+  e.x+=(player.x-e.x)/d*e.speed*dt;
+  e.y+=(player.y-e.y)/d*e.speed*dt;
+  e.angle+=dt;
+  if(d<e.r+player.r){
+   enemies.splice(i,1);
+   burst(e.x,e.y,"#ff5db8");
+   if(shield>0)totalScore+=25;
+   else if(invincible<=0){
+    lives--;invincible=1.5;
+    if(lives<=0){finish(false);return}
+   }
+  }
+ }
+ for(let i=items.length-1;i>=0;i--){
+  const item=items[i];
+  item.angle+=dt*2;
+  if(distance(item,player)<item.r+player.r){
+   items.splice(i,1);
+   collected++;
+   totalScore+=100;
+   charge+=20;
+   burst(item.x,item.y,"#67eaf3");
+   if(charge>=100){charge=0;shield=5}
+  }
+ }
+ for(let i=particles.length-1;i>=0;i--){
+  const p=particles[i];
+  p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;
+  if(p.life<=0)particles.splice(i,1);
+ }
+ updateHUD();
+ if(time>=20)finish(collected>=missions[current].goal);
+}
+function drawVirus(e){
+ ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.angle);
+ ctx.strokeStyle="#ff5db8";ctx.lineWidth=4;
+ for(let i=0;i<10;i++){
+  const a=i*Math.PI/5;
+  ctx.beginPath();
+  ctx.moveTo(Math.cos(a)*e.r*.7,Math.sin(a)*e.r*.7);
+  ctx.lineTo(Math.cos(a)*e.r*1.3,Math.sin(a)*e.r*1.3);
+  ctx.stroke();
+  circle(Math.cos(a)*e.r*1.3,Math.sin(a)*e.r*1.3,4,"#ff8acb");
+ }
+ circle(0,0,e.r,"#c3347c");
+ circle(-7,-4,4,"white");circle(7,-4,4,"white");
+ circle(-6,-4,2,"#191633");circle(8,-4,2,"#191633");
+ ctx.restore();
+}
+function drawPlayer(){
+ if(invincible>0&&Math.floor(time*12)%2===0)return;
+ ctx.save();ctx.translate(player.x,player.y);
+ ctx.shadowBlur=25;ctx.shadowColor="#67eaf3";
+ circle(0,0,28,"#43d5e9");circle(0,0,23,"#c4ffff");
+ ctx.shadowBlur=0;
+ circle(-8,-4,4,"#191633");circle(8,-4,4,"#191633");
+ ctx.strokeStyle="#191633";ctx.lineWidth=2;
+ ctx.beginPath();ctx.arc(0,2,8,.1,Math.PI-.1);ctx.stroke();
+ if(shield>0){
+  ctx.strokeStyle="#ffe66d";ctx.lineWidth=5;
+  ctx.beginPath();ctx.arc(0,0,38,0,Math.PI*2);ctx.stroke();
+ }
+ ctx.restore();
+}
+function draw(){
+ const colors=[
+  ["#270d38","#4a174d","#0c2543"],
+  ["#081e47","#173a65","#30145c"],
+  ["#170b36","#39206a","#073e51"]
+ ][current];
+ const g=ctx.createLinearGradient(0,0,W,H);
+ g.addColorStop(0,colors[0]);g.addColorStop(.5,colors[1]);g.addColorStop(1,colors[2]);
+ ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ for(let i=0;i<35;i++){
+  const x=(i*179+Math.sin(time+i)*35+W)%W;
+  const y=(i*131+time*(10+i%4*5))%H;
+  circle(x,y,8+i%5*5,"#ff648018");
+ }
+ for(const item of items){
+  ctx.save();ctx.translate(item.x,item.y);ctx.rotate(item.angle);
+  ctx.shadowBlur=18;ctx.shadowColor="#67eaf3";
+  circle(0,0,16,"#67eaf3");ctx.shadowBlur=0;
+  ctx.fillStyle="#171532";ctx.font="bold 22px Arial";
+  ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText("+",0,1);ctx.restore();
+ }
+ for(const e of enemies)drawVirus(e);
+ for(const p of particles)circle(p.x,p.y,3,p.color);
+ if(player)drawPlayer();
+}
+function loop(now){
+ if(!playing)return;
+ const dt=Math.min((now-last)/1000,.035);
+ last=now;
+ update(dt);
+ if(!playing)return;
+ draw();
+ frame=requestAnimationFrame(loop);
+}
+function finish(success){
+ playing=false;
+ const m=missions[current];
+ if(success)unlocked=Math.max(unlocked,Math.min(3,current+2));
+ document.getElementById("resultEmoji").textContent=success?(current===2?"🏆":"⭐"):"🧬";
+ document.getElementById("resultTag").textContent="NIVEL "+(current+1)+" / 3";
+ document.getElementById("resultTitle").textContent=success?
+  (current===2?"¡CIENTÍFICA DEL FUTURO!":"¡NIVEL COMPLETADO!"):"MISIÓN NO COMPLETADA";
+ document.getElementById("resultScore").textContent=totalScore;
+ document.getElementById("resultFact").textContent=m.fact;
+ const buttons=document.getElementById("resultButtons");
+ buttons.innerHTML="";
+ function addButton(label,fn,primary=false){
+  const b=document.createElement("button");
+  b.className="btn"+(primary?" primary":"");
+  b.textContent=label;b.onclick=fn;buttons.appendChild(b);
+ }
+ if(success&&current<2)addButton("SIGUIENTE NIVEL →",()=>selectLevel(current+1),true);
+ if(!success)addButton("↻ REINTENTAR",()=>selectLevel(current),true);
+ if(success&&current===2)addButton("↻ JUGAR DE NUEVO",()=>{
+  totalScore=0;selectLevel(0);
+ },true);
+ addButton("VER NIVELES",openLevels);
+ addButton("DESCUBRE LA CIENCIA",()=>show("science"));
+ show("levelResult");
+}
+</script>
+</body>
+</html>
