@@ -1,0 +1,405 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLINK — Hair Color Studio</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 25px 12px;
+  background: #17111e;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+h1 {
+  color: #ff91c6;
+  font-size: 55px;
+  letter-spacing: 9px;
+  margin: 10px;
+}
+
+.subtitle {
+  font-weight: bold;
+  letter-spacing: 3px;
+}
+
+p { color: #e6c9dc; }
+
+.stage {
+  width: min(92vw, 720px);
+  margin: 20px auto;
+  border: 3px solid #ff91c6;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #292032;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  transform: scaleX(-1);
+}
+
+video { display: none; }
+
+button {
+  background: #ff91c6;
+  border: none;
+  border-radius: 30px;
+  padding: 15px 28px;
+  margin: 8px;
+  color: #211020;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:disabled { opacity: .5; }
+
+#estado {
+  color: #ffb6d9;
+  min-height: 25px;
+  padding: 0 10px;
+}
+
+#color {
+  font-size: 23px;
+  font-weight: bold;
+  margin: 15px;
+}
+
+.palette {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px;
+  flex-wrap: wrap;
+}
+
+.dot {
+  width: 32px;
+  height: 32px;
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>BLINK</h1>
+<div class="subtitle">HAIR COLOR STUDIO</div>
+<p>Pestañea para transformar tu cabello ✨</p>
+
+<div class="stage">
+  <video id="video" autoplay muted playsinline></video>
+  <canvas id="canvas" width="640" height="480"></canvas>
+</div>
+
+<p id="estado">Presiona iniciar para activar la cámara.</p>
+
+<div id="color">Color: Natural</div>
+
+<button id="iniciar">INICIAR CÁMARA</button>
+<button id="probar" disabled>PROBAR COLOR</button>
+
+<div class="palette" id="palette"></div>
+<label>Intensidad <input id="intensidad" type="range" min="0" max="100" value="75"></label>
+<button id="natural">NATURAL</button><button id="detener" disabled>DETENER CÁMARA</button>
+
+<script type="module">
+import {
+  FilesetResolver,
+  FaceLandmarker,
+  ImageSegmenter
+} from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/vision_bundle.mjs";
+
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const estado = document.getElementById("estado");
+const iniciar = document.getElementById("iniciar");
+const probar = document.getElementById("probar");
+const colorTexto = document.getElementById("color");
+const palette = document.getElementById("palette");
+
+const colores = [
+  { nombre: "Rosado", rgb: [255, 65, 160] },
+  { nombre: "Morado", rgb: [155, 65, 235] },
+  { nombre: "Azul", rgb: [35, 115, 255] },
+  { nombre: "Rojo", rgb: [245, 45, 65] },
+  { nombre: "Rubio", rgb: [235, 190, 90] },
+  { nombre: "Verde", rgb: [45, 205, 130] }
+];
+
+let indice = -1;
+let faceModel = null;
+let hairModel = null;
+let iaLista = false;
+
+let ojosCerrados = false;
+let cuadrosCerrados = 0;
+let cuadrosAbiertos = 0;
+let ultimoCambio = 0;
+let ultimoVideo = -1;
+let procesando = false;
+let mascaraPelo = null;
+let activo = false;
+let frameId;
+let ultimoSegmento = -Infinity;
+const detener = document.getElementById("detener");
+document.getElementById("natural").onclick = () => { indice = -1; colorTexto.textContent = "Color: Natural"; };
+detener.onclick = () => { activo = false; cancelAnimationFrame(frameId); video.srcObject?.getTracks().forEach(t => t.stop()); video.srcObject = null; mascaraPelo = null; ctx.clearRect(0,0,canvas.width,canvas.height); iniciar.disabled = false; iniciar.textContent = "INICIAR CÁMARA"; detener.disabled = true; probar.disabled = true; estado.textContent = "Cámara detenida."; };
+
+const mascaraCanvas = document.createElement("canvas");
+const mascaraCtx = mascaraCanvas.getContext("2d");
+
+colores.forEach((c, i) => {
+  const dot = document.createElement("div");
+  dot.className = "dot";
+  dot.style.background = `rgb(${c.rgb.join(",")})`;
+
+  dot.onclick = () => {
+    indice = i;
+    actualizarColor();
+  };
+
+  palette.appendChild(dot);
+});
+
+function actualizarColor() {
+  if (indice >= 0) {
+    colorTexto.textContent = "Color: " + colores[indice].nombre;
+  }
+}
+
+function cambiarColor() {
+  indice = (indice + 1) % colores.length;
+  actualizarColor();
+}
+
+probar.onclick = cambiarColor;
+
+function detectarPestaneo(resultado) {
+  const categorias =
+    resultado.faceBlendshapes?.[0]?.categories;
+
+  if (!categorias) {
+    cuadrosCerrados = 0;
+    cuadrosAbiertos = 0;
+    ojosCerrados = false;
+    return;
+  }
+
+  const izquierdo =
+    categorias.find(c => c.categoryName === "eyeBlinkLeft")?.score ?? 0;
+
+  const derecho =
+    categorias.find(c => c.categoryName === "eyeBlinkRight")?.score ?? 0;
+
+  const valor = (izquierdo + derecho) / 2;
+
+  if (valor > 0.50) {
+    cuadrosCerrados++;
+    cuadrosAbiertos = 0;
+
+    if (cuadrosCerrados >= 1) {
+      ojosCerrados = true;
+    }
+
+  } else if (valor < 0.25) {
+    cuadrosAbiertos++;
+    cuadrosCerrados = 0;
+
+    if (ojosCerrados && cuadrosAbiertos >= 1) {
+      if (performance.now() - ultimoCambio > 500) {
+        cambiarColor();
+        ultimoCambio = performance.now();
+      }
+
+      ojosCerrados = false;
+    }
+  }
+}
+
+function dibujarPelo() {
+  if (indice < 0 || !mascaraPelo) return;
+
+  const { width, height, datos } = mascaraPelo;
+  const rgb = colores[indice].rgb;
+
+  mascaraCanvas.width = width;
+  mascaraCanvas.height = height;
+
+  const imagen = mascaraCtx.createImageData(width, height);
+
+  for (let i = 0; i < datos.length; i++) {
+    const p = i * 4;
+
+    imagen.data[p] = rgb[0];
+    imagen.data[p + 1] = rgb[1];
+    imagen.data[p + 2] = rgb[2];
+    imagen.data[p + 3] = datos[i] === 1 ? 215 : 0;
+  }
+
+  mascaraCtx.putImageData(imagen, 0, 0);
+
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  ctx.globalAlpha = Number(document.getElementById("intensidad").value) / 100 * 0.65;
+  ctx.drawImage(
+    mascaraCanvas, 0, 0,
+    canvas.width, canvas.height
+  );
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha = Number(document.getElementById("intensidad").value) / 100 * 0.45;
+  ctx.drawImage(
+    mascaraCanvas, 0, 0,
+    canvas.width, canvas.height
+  );
+  ctx.restore();
+}
+
+function animar() {
+  if (!activo) return;
+  if (video.readyState >= 2) {
+    ctx.drawImage(
+      video, 0, 0,
+      canvas.width, canvas.height
+    );
+
+    if (iaLista && !procesando &&
+        video.currentTime !== ultimoVideo) {
+
+      ultimoVideo = video.currentTime;
+      procesando = true;
+
+      try {
+        const tiempo = performance.now();
+
+        const rostro =
+          faceModel.detectForVideo(video, tiempo);
+
+        detectarPestaneo(rostro);
+
+        if (tiempo - ultimoSegmento >= 80) {
+        ultimoSegmento = tiempo;
+        hairModel.segmentForVideo(video, tiempo, resultado => {
+          const mask = resultado.categoryMask;
+
+          if (mask) {
+            mascaraPelo = {
+              width: mask.width,
+              height: mask.height,
+              datos: new Uint8Array(mask.getAsUint8Array())
+            };
+          }
+        });
+        }
+
+      } catch (error) {
+        console.error(error);
+        estado.textContent =
+          "Error de detección: " + error.message;
+        iaLista = false;
+      }
+
+      procesando = false;
+    }
+
+    dibujarPelo();
+  }
+
+  frameId = requestAnimationFrame(animar);
+}
+
+async function cargarIA() {
+  try {
+    estado.textContent =
+      "Cargando inteligencia artificial...";
+
+    // Archivos WASM locales servidos por Vite.
+    const files = await FilesetResolver.forVisionTasks(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm"
+    );
+
+    faceModel = await FaceLandmarker.createFromOptions(files, {
+      baseOptions: {
+        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+        delegate: "CPU"
+      },
+      runningMode: "VIDEO",
+      numFaces: 1,
+      outputFaceBlendshapes: true
+    });
+
+    hairModel = await ImageSegmenter.createFromOptions(files, {
+      baseOptions: {
+        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_segmenter/hair_segmenter/float32/1/hair_segmenter.tflite",
+        delegate: "CPU"
+      },
+      runningMode: "VIDEO",
+      outputCategoryMask: true,
+      outputConfidenceMasks: false
+    });
+
+    iaLista = true;
+
+    estado.textContent =
+      "¡IA ACTIVADA! Pestañea para cambiar el color.";
+
+  } catch (error) {
+    console.error("Error IA:", error);
+
+    estado.textContent =
+      "Error cargando IA: " + error.message;
+  }
+}
+
+iniciar.onclick = async () => {
+  iniciar.disabled = true;
+  estado.textContent = "Activando cámara...";
+
+  try {
+    const stream =
+      await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480 },
+        audio: false
+      });
+
+    video.srcObject = stream;
+    await video.play();
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    iniciar.textContent = "CÁMARA ACTIVADA";
+    activo = true;
+    ultimoVideo = -1;
+    ultimoSegmento = -Infinity;
+    detener.disabled = false;
+    animar();
+    if (!iaLista) await cargarIA();
+    if (activo && iaLista) { probar.disabled = false; estado.textContent = "¡IA ACTIVADA! Pestañea para cambiar el color."; }
+
+  } catch (error) {
+    console.error(error);
+    estado.textContent =
+      "Error de cámara: " + error.message;
+    iniciar.disabled = false;
+  }
+};
+</script>
+
+</body>
+</html>
